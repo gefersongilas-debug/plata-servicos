@@ -154,7 +154,7 @@ export default function Home() {
     <main>
       <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
         <a href="#inicio" className="brand" aria-label="Plata Serviços — início" onClick={closeMenu}>
-          <Image src="/images/plata-logo.png" width={219} height={73} alt="Grupo Plata Serviços" priority />
+          <Image src="/images/plata-logo.png" width={219} height={73} alt="Grupo Plata Serviços" priority unoptimized />
         </a>
 
         <button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menu" aria-expanded={menuOpen}>
@@ -200,7 +200,7 @@ export default function Home() {
 
           <div className="hero-visual hero-enter delay-3">
             <div className="hero-image-wrap">
-              <Image src="/images/videotelemetria.png" alt="Câmera inteligente instalada em veículo de frota" fill priority sizes="(max-width: 900px) 100vw, 48vw" />
+              <Image src="/images/videotelemetria.png" alt="Câmera inteligente instalada em veículo de frota" fill priority sizes="(max-width: 900px) 100vw, 48vw" unoptimized />
             </div>
             <div className="floating-card card-monitoring">
               <div className="floating-icon"><Eye size={18} /></div>
@@ -270,7 +270,7 @@ export default function Home() {
 
         <div className="showcase-grid" key={activeSolution}>
           <div className="showcase-image">
-            <Image src={active.image} alt={active.imageAlt} fill sizes="(max-width: 900px) 100vw, 51vw" />
+            <Image src={active.image} alt={active.imageAlt} fill sizes="(max-width: 900px) 100vw, 51vw" unoptimized />
             <div className="image-badge"><span><CircleCheck size={17} /></span> Tecnologia Plata</div>
           </div>
           <div className="showcase-copy">
@@ -307,8 +307,8 @@ export default function Home() {
 
       <section className="section about" id="plata">
         <div className="about-images">
-          <Reveal className="about-image-main"><Image src="/images/seguranca-estoque.png" alt="Ambiente empresarial protegido pela Plata" fill sizes="(max-width: 900px) 90vw, 45vw" /></Reveal>
-          <Reveal delay={150} className="about-image-small"><Image src="/images/controle-acesso.png" alt="Controle de acesso e câmera de segurança" fill sizes="280px" /></Reveal>
+          <Reveal className="about-image-main"><Image src="/images/seguranca-estoque.png" alt="Ambiente empresarial protegido pela Plata" fill sizes="(max-width: 900px) 90vw, 45vw" unoptimized /></Reveal>
+          <Reveal delay={150} className="about-image-small"><Image src="/images/controle-acesso.png" alt="Controle de acesso e câmera de segurança" fill sizes="280px" unoptimized /></Reveal>
           <span className="about-stamp">GRUPO PLATA • CEARÁ •</span>
         </div>
         <div className="about-copy">
@@ -374,7 +374,7 @@ export default function Home() {
 
       <footer>
         <div className="footer-top">
-          <Image src="/images/plata-logo.png" width={219} height={73} alt="Grupo Plata Serviços" />
+          <Image src="/images/plata-logo.png" width={219} height={73} alt="Grupo Plata Serviços" unoptimized />
           <p>Tecnologia para proteger.<br />Confiança para seguir em frente.</p>
           <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">(88) 9862-0015 <ArrowDownRight size={18} /></a>
         </div>
