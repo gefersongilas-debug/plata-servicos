@@ -396,6 +396,37 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="real-operation" aria-labelledby="real-operation-title">
+        <div className="real-operation-heading">
+          <Reveal><p className="eyebrow">Plata por dentro</p></Reveal>
+          <Reveal delay={80}>
+            <h2 id="real-operation-title">Pessoas reais.<br /><em>Presença todos os dias.</em></h2>
+          </Reveal>
+          <Reveal delay={140}>
+            <p>Registros da equipe e das operações que aproximam a Plata da rotina de cada cliente.</p>
+          </Reveal>
+        </div>
+
+        <div className="real-photo-grid">
+          <Reveal className="real-photo-card real-photo-security">
+            <Image src="/images/plata-real-seguranca.webp" alt="Profissionais da segurança patrimonial da Plata em campo" fill sizes="(max-width: 820px) 50vw, 24vw" unoptimized />
+            <span>Segurança patrimonial</span>
+          </Reveal>
+          <Reveal delay={70} className="real-photo-card real-photo-facilities">
+            <Image src="/images/plata-real-facilities.webp" alt="Equipe de facilities da Plata com equipamentos de limpeza profissional" fill sizes="(max-width: 820px) 50vw, 34vw" unoptimized />
+            <span>Facilities</span>
+          </Reveal>
+          <Reveal delay={120} className="real-photo-card real-photo-service">
+            <Image src="/images/plata-real-atendimento.webp" alt="Profissional da Plata durante atendimento ao cliente" fill sizes="(max-width: 820px) 50vw, 34vw" unoptimized />
+            <span>Atendimento próximo</span>
+          </Reveal>
+          <Reveal delay={170} className="real-photo-card real-photo-tracking">
+            <Image src="/images/plata-real-rastreamento.webp" alt="Profissional na central de rastreamento veicular da Plata" fill sizes="(max-width: 820px) 50vw, 26vw" unoptimized />
+            <span>Central de rastreamento</span>
+          </Reveal>
+        </div>
+      </section>
+
       <section className="process-section">
         <div className="process-heading">
           <Reveal><p className="eyebrow light"><span>06</span> Do desafio à solução</p></Reveal>
