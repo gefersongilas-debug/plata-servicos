@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   title: "Grupo Plata Serviços | Proteção, tecnologia e gestão",
   description: "Soluções integradas em rastreamento veicular, segurança eletrônica, gestão condominial, segurança patrimonial e facilities no Ceará.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
 };
 
