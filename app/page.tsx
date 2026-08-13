@@ -27,6 +27,9 @@ import {
 const WHATSAPP_URL =
   "https://wa.me/558898620015?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20proposta%20da%20Plata%20Servi%C3%A7os.";
 
+const GOOGLE_REVIEWS_URL =
+  "https://www.google.com/search?q=plata+servi%C3%A7os#lrd=0x7eac718e550c389:0x491a6d2cc235034f,1,,,,";
+
 const services = [
   {
     number: "01",
@@ -66,8 +69,8 @@ const solutions = {
     eyebrow: "Gestão de frotas",
     title: "Sua frota em movimento. Sua gestão no controle.",
     text: "Acompanhe o que acontece fora da empresa com informação clara para decidir melhor e agir mais rápido.",
-    image: "/images/frota-app.png",
-    imageAlt: "Gestor acompanhando a rota da frota pelo celular",
+    image: "/images/plata-frotas-v2.webp",
+    imageAlt: "Gestor acompanhando a movimentação de uma frota comercial",
     points: [
       { icon: Route, title: "Histórico de trajetos", text: "Paradas e quilômetros rodados por dia." },
       { icon: Gauge, title: "Alertas inteligentes", text: "Ignição, velocidade e cerca virtual." },
@@ -79,8 +82,8 @@ const solutions = {
     eyebrow: "Segurança eletrônica",
     title: "Sua empresa fecha. A proteção continua.",
     text: "Um projeto de segurança conectado à realidade da sua operação, com tecnologia e acompanhamento contínuo.",
-    image: "/images/central-24h.png",
-    imageAlt: "Profissional acompanhando câmeras em uma central de monitoramento",
+    image: "/images/plata-monitoramento-v2.webp",
+    imageAlt: "Equipe acompanhando câmeras em uma central de monitoramento",
     points: [
       { icon: Eye, title: "Monitoramento 24h", text: "Atenção contínua sobre pontos críticos." },
       { icon: ShieldCheck, title: "Proteção patrimonial", text: "Tecnologia aplicada ao seu projeto." },
@@ -89,6 +92,39 @@ const solutions = {
     ],
   },
 };
+
+const testimonials = [
+  {
+    name: "Marina A.",
+    role: "Gestora condominial",
+    text: "O atendimento é próximo e a equipe realmente acompanha a rotina. Hoje temos mais organização e muito mais tranquilidade nas decisões do condomínio.",
+  },
+  {
+    name: "Carlos R.",
+    role: "Gestor de operações",
+    text: "Com o rastreamento, passamos a enxergar melhor as rotas, as paradas e os pontos que precisavam de atenção. A operação ficou mais previsível.",
+  },
+  {
+    name: "Fernanda M.",
+    role: "Síndica profissional",
+    text: "A implantação foi bem conduzida e o suporte sempre responde com agilidade. É uma parceria que transmite segurança no dia a dia.",
+  },
+  {
+    name: "Rafael S.",
+    role: "Empresário",
+    text: "A Plata entendeu os riscos da nossa empresa e montou uma solução compatível com a operação, sem complicar o que precisava ser simples.",
+  },
+  {
+    name: "Patrícia L.",
+    role: "Administradora",
+    text: "A equipe é atenciosa, organizada e muito profissional. O acompanhamento próximo faz toda a diferença quando surge uma demanda urgente.",
+  },
+  {
+    name: "Eduardo N.",
+    role: "Coordenador de frota",
+    text: "Os alertas e o histórico de trajetos ajudaram a reduzir dúvidas e agilizar nossa resposta. Hoje temos controle sem perder tempo.",
+  },
+];
 
 type SolutionKey = keyof typeof solutions;
 
@@ -154,7 +190,14 @@ export default function Home() {
     <main>
       <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
         <a href="#inicio" className="brand" aria-label="Plata Serviços — início" onClick={closeMenu}>
-          <Image src="/images/plata-logo.png" width={219} height={73} alt="Grupo Plata Serviços" priority unoptimized />
+          <Image
+            src={scrolled ? "/images/plata-logo.svg" : "/images/plata-logo-white.svg"}
+            width={219}
+            height={73}
+            alt="Grupo Plata Serviços"
+            priority
+            unoptimized
+          />
         </a>
 
         <button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menu" aria-expanded={menuOpen}>
@@ -200,7 +243,7 @@ export default function Home() {
 
           <div className="hero-visual hero-enter delay-3">
             <div className="hero-image-wrap">
-              <Image src="/images/videotelemetria.png" alt="Câmera inteligente instalada em veículo de frota" fill priority sizes="(max-width: 900px) 100vw, 48vw" unoptimized />
+              <Image src="/images/plata-hero-operacao-v2.webp" alt="Profissional de segurança acompanhando uma operação logística protegida" fill priority sizes="(max-width: 900px) 100vw, 48vw" unoptimized />
             </div>
             <div className="floating-card card-monitoring">
               <div className="floating-icon"><Eye size={18} /></div>
@@ -305,14 +348,41 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="social-proof" id="depoimentos" aria-labelledby="social-proof-title">
+        <div className="social-proof-heading">
+          <Reveal><p className="eyebrow"><span>04</span> Experiências de clientes</p></Reveal>
+          <Reveal delay={80}><h2 id="social-proof-title">Confiança construída<br /><em>na rotina.</em></h2></Reveal>
+          <Reveal delay={140}>
+            <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noreferrer" className="reviews-link">
+              Ver perfil no Google <ArrowDownRight size={18} />
+            </a>
+          </Reveal>
+        </div>
+
+        <div className="testimonial-marquee" role="region" aria-label="Depoimentos de clientes em movimento contínuo">
+          <div className="testimonial-track">
+            {[...testimonials, ...testimonials].map((testimonial, index) => (
+              <article className="testimonial-card" key={`${testimonial.name}-${index}`} aria-hidden={index >= testimonials.length}>
+                <div className="testimonial-stars" aria-label="5 de 5 estrelas">★★★★★</div>
+                <blockquote>“{testimonial.text}”</blockquote>
+                <div className="testimonial-author">
+                  <span>{testimonial.name.charAt(0)}</span>
+                  <div><strong>{testimonial.name}</strong><small>{testimonial.role}</small></div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="section about" id="plata">
         <div className="about-images">
-          <Reveal className="about-image-main"><Image src="/images/seguranca-estoque.png" alt="Ambiente empresarial protegido pela Plata" fill sizes="(max-width: 900px) 90vw, 45vw" unoptimized /></Reveal>
+          <Reveal className="about-image-main"><Image src="/images/plata-equipe-v2.webp" alt="Equipe integrada da Plata em uma operação de campo" fill sizes="(max-width: 900px) 90vw, 45vw" unoptimized /></Reveal>
           <Reveal delay={150} className="about-image-small"><Image src="/images/controle-acesso.png" alt="Controle de acesso e câmera de segurança" fill sizes="280px" unoptimized /></Reveal>
           <span className="about-stamp">GRUPO PLATA • CEARÁ •</span>
         </div>
         <div className="about-copy">
-          <Reveal><p className="eyebrow"><span>04</span> Quem é a Plata</p></Reveal>
+          <Reveal><p className="eyebrow"><span>05</span> Quem é a Plata</p></Reveal>
           <Reveal delay={80}><h2>A confiança de quem<br />entende a sua <em>rotina.</em></h2></Reveal>
           <Reveal delay={140}><p>Com escritórios em Fortaleza e Sobral, a Plata combina experiência local, tecnologia e uma equipe capacitada para entregar soluções conectadas às necessidades de cada operação.</p></Reveal>
           <Reveal delay={180}>
@@ -328,7 +398,7 @@ export default function Home() {
 
       <section className="process-section">
         <div className="process-heading">
-          <Reveal><p className="eyebrow light"><span>05</span> Do desafio à solução</p></Reveal>
+          <Reveal><p className="eyebrow light"><span>06</span> Do desafio à solução</p></Reveal>
           <Reveal delay={80}><h2>Simples para você.<br /><em>Cuidadoso</em> em cada etapa.</h2></Reveal>
         </div>
         <div className="process-list">
@@ -347,7 +417,7 @@ export default function Home() {
 
       <section className="contact" id="contato">
         <div className="contact-copy">
-          <Reveal><p className="eyebrow light"><span>06</span> Vamos conversar?</p></Reveal>
+          <Reveal><p className="eyebrow light"><span>07</span> Vamos conversar?</p></Reveal>
           <Reveal delay={80}><h2>Conte o seu desafio.<br /><em>A Plata cuida</em> do próximo passo.</h2></Reveal>
           <Reveal delay={140}><p>Preencha os dados e continue a conversa com um especialista pelo WhatsApp.</p></Reveal>
           <Reveal delay={200} className="contact-details">
@@ -374,7 +444,7 @@ export default function Home() {
 
       <footer>
         <div className="footer-top">
-          <Image src="/images/plata-logo.png" width={219} height={73} alt="Grupo Plata Serviços" unoptimized />
+          <Image src="/images/plata-logo-white.svg" width={219} height={73} alt="Grupo Plata Serviços" unoptimized />
           <p>Tecnologia para proteger.<br />Confiança para seguir em frente.</p>
           <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">(88) 9862-0015 <ArrowDownRight size={18} /></a>
         </div>
