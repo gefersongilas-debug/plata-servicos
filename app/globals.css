@@ -325,6 +325,10 @@ h2 { margin: 0; font-family: var(--font-display); font-size: clamp(42px, 4.2vw, 
 .form-wrap input::placeholder { color: #aaa; }
 .form-wrap .button { grid-column: span 2; margin-top: 5px; }
 .form-wrap small { grid-column: span 2; display: flex; align-items: center; justify-content: center; gap: 6px; color: #8b8b86; font-size: 9px; }
+.form-wrap .form-status { font-size: 10px; font-weight: 700; text-align: center; }
+.form-wrap .form-status-ok { color: #1c7a4a; }
+.form-wrap .form-status-error { color: #b23b1a; }
+.form-wrap .button:disabled { opacity: .6; cursor: not-allowed; }
 
 footer { background: #111; color: white; padding: 70px clamp(24px, 7vw, 110px) 25px; }
 .footer-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 50px; align-items: center; padding-bottom: 55px; border-bottom: 1px solid rgba(255,255,255,.12); }

@@ -27,6 +27,28 @@ import {
 const WHATSAPP_URL =
   "https://wa.me/558898620015?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20proposta%20da%20Plata%20Servi%C3%A7os.";
 
+const WEBHOOK_URL = "https://hook.us1.make.celonis.com/vxs7dufd4l2vydoibl2uqnno1h4zgat5";
+
+declare global {
+  interface Window {
+    dataLayer?: Record<string, unknown>[];
+  }
+}
+
+const maskPhone = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits.replace(/^(\d{0,2})/, "($1");
+  if (digits.length <= 6) return digits.replace(/^(\d{2})(\d{0,4})/, "($1) $2");
+  if (digits.length <= 10) return digits.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+  return digits.replace(/^(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+};
+
+const maskName = (value: string) =>
+  value.replace(/[^A-Za-zÀ-ÿ'\s-]/g, "").replace(/\s{2,}/g, " ").slice(0, 60);
+
+const maskCompany = (value: string) =>
+  value.replace(/[^A-Za-z0-9À-ÿ&.'\s-]/g, "").replace(/\s{2,}/g, " ").slice(0, 80);
+
 const GOOGLE_REVIEWS_URL =
   "https://www.google.com/search?q=plata+servi%C3%A7os#lrd=0x7eac718e550c389:0x491a6d2cc235034f,1,,,,";
 
@@ -195,6 +217,10 @@ export default function Home() {
   const [activeSolution, setActiveSolution] = useState<SolutionKey>("frota");
   const [scrolled, setScrolled] = useState(false);
   const [selectedService, setSelectedService] = useState("Rastreamento veicular");
+  const [formName, setFormName] = useState("");
+  const [formCompany, setFormCompany] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
@@ -246,9 +272,37 @@ export default function Home() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const name = form.get("name")?.toString().trim();
-    const company = form.get("company")?.toString().trim();
+    if (formStatus === "sending") return;
+
+    const name = formName.trim();
+    const company = formCompany.trim();
+    const phoneDigits = formPhone.replace(/\D/g, "");
+
+    setFormStatus("sending");
+
+    const payload = {
+      nome: name,
+      empresa: company,
+      telefone: formPhone,
+      telefone_e164: `+55${phoneDigits}`,
+      servico: selectedService,
+      origem: "LP Plata Serviços",
+      pagina: window.location.href,
+      enviado_em: new Date().toISOString(),
+    };
+
+    fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    })
+      .then((response) => setFormStatus(response.ok ? "sent" : "error"))
+      .catch(() => setFormStatus("error"));
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: "generate_lead", form_name: "contato_lp", servico: selectedService });
+
     const message = `Olá, sou ${name || "um potencial cliente"}${company ? ` da ${company}` : ""}. Gostaria de uma proposta para ${selectedService}.`;
     window.open(`https://wa.me/558898620015?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
   };
@@ -574,15 +628,54 @@ export default function Home() {
 
         <Reveal delay={120} className="form-wrap">
           <form onSubmit={handleSubmit}>
-            <label>Seu nome<input name="name" type="text" placeholder="Como podemos chamar você?" required /></label>
-            <label>Empresa<input name="company" type="text" placeholder="Nome da sua empresa" /></label>
-            <label>Telefone<input name="phone" type="tel" placeholder="(00) 00000-0000" required /></label>
+            <label>Seu nome
+              <input
+                name="name"
+                type="text"
+                placeholder="Como podemos chamar você?"
+                value={formName}
+                onChange={(e) => setFormName(maskName(e.target.value))}
+                pattern="[A-Za-zÀ-ÿ'\s-]{2,60}"
+                title="Digite apenas letras."
+                autoComplete="name"
+                required
+              />
+            </label>
+            <label>Empresa
+              <input
+                name="company"
+                type="text"
+                placeholder="Nome da sua empresa"
+                value={formCompany}
+                onChange={(e) => setFormCompany(maskCompany(e.target.value))}
+                autoComplete="organization"
+              />
+            </label>
+            <label>Telefone
+              <input
+                name="phone"
+                type="tel"
+                inputMode="numeric"
+                placeholder="(00) 00000-0000"
+                value={formPhone}
+                onChange={(e) => setFormPhone(maskPhone(e.target.value))}
+                pattern="\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}"
+                title="Informe um telefone no formato (00) 00000-0000."
+                autoComplete="tel"
+                maxLength={15}
+                required
+              />
+            </label>
             <label>Qual solução você procura?
               <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
                 {services.map((service) => <option key={service.title}>{service.title}</option>)}
               </select>
             </label>
-            <button type="submit" className="button button-primary">Solicitar proposta <ArrowRight size={18} /></button>
+            <button type="submit" className="button button-primary" disabled={formStatus === "sending"}>
+              {formStatus === "sending" ? "Enviando..." : "Enviar e falar no WhatsApp"} <ArrowRight size={18} />
+            </button>
+            {formStatus === "sent" && <small className="form-status form-status-ok" role="status"><Check size={14} /> Recebemos seus dados. Em instantes um especialista fala com você.</small>}
+            {formStatus === "error" && <small className="form-status form-status-error" role="alert"><ShieldCheck size={14} /> Não conseguimos registrar seus dados, mas você já pode falar com a gente no WhatsApp.</small>}
             <small><ShieldCheck size={14} /> Seus dados serão usados apenas para este atendimento.</small>
           </form>
         </Reveal>
@@ -601,7 +694,19 @@ export default function Home() {
         </div>
       </footer>
 
-      <a className="whatsapp-float" href={WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label="Falar com a Plata pelo WhatsApp">
+      <a
+        className="whatsapp-float"
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noreferrer"
+        id="botao-flutuante"
+        data-event-name="botao-flutuante"
+        onClick={() => {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({ event: "botao-flutuante", event_name: "botao-flutuante", link_url: WHATSAPP_URL });
+        }}
+        aria-label="Falar com a Plata pelo WhatsApp"
+      >
         <Headphones size={21} /><span>Fale com a Plata</span>
       </a>
     </main>
