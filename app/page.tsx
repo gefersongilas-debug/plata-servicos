@@ -64,13 +64,56 @@ const services = [
   },
 ];
 
+const heroSlides = [
+  {
+    number: "01",
+    title: "Rastreamento veicular",
+    caption: "Trajetos, paradas e alertas acompanhados em tempo real.",
+    image: "/images/plata-frotas-real.webp",
+    alt: "Equipe da Plata acompanhando a frota na central de rastreamento",
+    icon: Route,
+  },
+  {
+    number: "02",
+    title: "Segurança eletrônica",
+    caption: "Câmeras, controle de acesso e monitoramento 24 horas.",
+    image: "/images/plata-monitoramento-real.webp",
+    alt: "Profissional da Plata acompanhando as câmeras na central de monitoramento",
+    icon: Camera,
+  },
+  {
+    number: "03",
+    title: "Administração condominial",
+    caption: "Gestão transparente e atendimento próximo ao síndico.",
+    image: "/images/plata-condominial-real.webp",
+    alt: "Profissional da administração condominial da Plata em atendimento",
+    icon: Building2,
+  },
+  {
+    number: "04",
+    title: "Segurança patrimonial",
+    caption: "Equipes treinadas e presentes na rotina da operação.",
+    image: "/images/plata-real-seguranca.webp",
+    alt: "Profissionais da segurança patrimonial da Plata em campo",
+    icon: ShieldCheck,
+  },
+  {
+    number: "05",
+    title: "Facilities",
+    caption: "Portaria, limpeza e zeladoria para manter o ritmo.",
+    image: "/images/plata-facilities-real.webp",
+    alt: "Equipe de facilities da Plata em um cliente",
+    icon: Users,
+  },
+];
+
 const solutions = {
   frota: {
     eyebrow: "Gestão de frotas",
     title: "Sua frota em movimento. Sua gestão no controle.",
     text: "Acompanhe o que acontece fora da empresa com informação clara para decidir melhor e agir mais rápido.",
-    image: "/images/plata-frotas-v2.webp",
-    imageAlt: "Gestor acompanhando a movimentação de uma frota comercial",
+    image: "/images/plata-frotas-real.webp",
+    imageAlt: "Equipe da Plata acompanhando a movimentação da frota na central de rastreamento",
     points: [
       { icon: Route, title: "Histórico de trajetos", text: "Paradas e quilômetros rodados por dia." },
       { icon: Gauge, title: "Alertas inteligentes", text: "Ignição, velocidade e cerca virtual." },
@@ -82,8 +125,8 @@ const solutions = {
     eyebrow: "Segurança eletrônica",
     title: "Sua empresa fecha. A proteção continua.",
     text: "Um projeto de segurança conectado à realidade da sua operação, com tecnologia e acompanhamento contínuo.",
-    image: "/images/plata-monitoramento-v2.webp",
-    imageAlt: "Equipe acompanhando câmeras em uma central de monitoramento",
+    image: "/images/plata-monitoramento-real.webp",
+    imageAlt: "Profissional da Plata acompanhando as câmeras na central de monitoramento",
     points: [
       { icon: Eye, title: "Monitoramento 24h", text: "Atenção contínua sobre pontos críticos." },
       { icon: ShieldCheck, title: "Proteção patrimonial", text: "Tecnologia aplicada ao seu projeto." },
@@ -141,9 +184,13 @@ export default function Home() {
   const [activeSolution, setActiveSolution] = useState<SolutionKey>("frota");
   const [scrolled, setScrolled] = useState(false);
   const [selectedService, setSelectedService] = useState("Rastreamento veicular");
+  const [heroSlide, setHeroSlide] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
 
   const active = useMemo(() => solutions[activeSolution], [activeSolution]);
+  const heroActive = heroSlides[heroSlide];
+  const HeroActiveIcon = heroActive.icon;
 
   useEffect(() => {
     const revealItems = document.querySelectorAll(".reveal");
@@ -174,6 +221,15 @@ export default function Home() {
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (heroPaused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => {
+      setHeroSlide((current) => (current + 1) % heroSlides.length);
+    }, 5200);
+    return () => window.clearInterval(timer);
+  }, [heroPaused, heroSlide]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -242,8 +298,51 @@ export default function Home() {
           </div>
 
           <div className="hero-visual hero-enter delay-3">
-            <div className="hero-image-wrap">
-              <Image src="/images/plata-hero-operacao-v2.webp" alt="Profissional de segurança acompanhando uma operação logística protegida" fill priority sizes="(max-width: 900px) 100vw, 48vw" unoptimized />
+            <div
+              className={`hero-image-wrap hero-slider ${heroPaused ? "is-paused" : ""}`}
+              role="group"
+              aria-roledescription="carrossel"
+              aria-label="Serviços da Plata"
+              onMouseEnter={() => setHeroPaused(true)}
+              onMouseLeave={() => setHeroPaused(false)}
+              onFocusCapture={() => setHeroPaused(true)}
+              onBlurCapture={() => setHeroPaused(false)}
+            >
+              {heroSlides.map((slide, index) => (
+                <div
+                  key={slide.title}
+                  className={`hero-slide ${index === heroSlide ? "is-active" : ""}`}
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${index + 1} de ${heroSlides.length}: ${slide.title}`}
+                  aria-hidden={index !== heroSlide}
+                >
+                  <Image src={slide.image} alt={slide.alt} fill priority={index === 0} sizes="(max-width: 900px) 100vw, 48vw" unoptimized />
+                </div>
+              ))}
+
+              <div className="hero-caption" key={heroActive.number}>
+                <span className="hero-caption-tag"><HeroActiveIcon size={13} /> Serviço {heroActive.number}</span>
+                <strong>{heroActive.title}</strong>
+                <small>{heroActive.caption}</small>
+              </div>
+
+              <div className="hero-slider-nav">
+                <div className="hero-dots" role="tablist" aria-label="Escolher serviço em destaque">
+                  {heroSlides.map((slide, index) => (
+                    <button
+                      key={slide.title}
+                      type="button"
+                      role="tab"
+                      className={`hero-dot ${index === heroSlide ? "is-active" : ""}`}
+                      aria-selected={index === heroSlide}
+                      aria-label={slide.title}
+                      onClick={() => setHeroSlide(index)}
+                    />
+                  ))}
+                </div>
+                <span className="visual-index">{heroActive.number} <span>/ 0{heroSlides.length}</span></span>
+              </div>
             </div>
             <div className="floating-card card-monitoring">
               <div className="floating-icon"><Eye size={18} /></div>
@@ -254,7 +353,6 @@ export default function Home() {
               <span className="pulse-ring"><ShieldCheck size={21} /></span>
               <div><span>Operação conectada</span><strong>Proteção + controle</strong></div>
             </div>
-            <div className="visual-index">01 <span>/ 05</span></div>
           </div>
         </div>
 
@@ -342,7 +440,7 @@ export default function Home() {
           <h2>Proximidade local.<br />Estrutura para <em>ir além.</em></h2>
         </Reveal>
         <div className="number-grid">
-          <Reveal delay={80} className="number-card"><strong>6+</strong><span>anos construindo<br />relações de confiança</span></Reveal>
+          <Reveal delay={80} className="number-card"><strong>8+</strong><span>anos construindo<br />relações de confiança</span></Reveal>
           <Reveal delay={150} className="number-card"><strong>02</strong><span>bases estratégicas:<br />Fortaleza e Sobral</span></Reveal>
           <Reveal delay={220} className="number-card orange"><strong>24h</strong><span>de monitoramento<br />para sua operação</span></Reveal>
         </div>
@@ -377,8 +475,8 @@ export default function Home() {
 
       <section className="section about" id="plata">
         <div className="about-images">
-          <Reveal className="about-image-main"><Image src="/images/plata-equipe-v2.webp" alt="Equipe integrada da Plata em uma operação de campo" fill sizes="(max-width: 900px) 90vw, 45vw" unoptimized /></Reveal>
-          <Reveal delay={150} className="about-image-small"><Image src="/images/controle-acesso.png" alt="Controle de acesso e câmera de segurança" fill sizes="280px" unoptimized /></Reveal>
+          <Reveal className="about-image-main"><Image src="/images/plata-equipe-real.webp" alt="Profissional de facilities da Plata durante o atendimento em um cliente" fill sizes="(max-width: 900px) 90vw, 45vw" unoptimized /></Reveal>
+          <Reveal delay={150} className="about-image-small"><Image src="/images/plata-escritorio-real.webp" alt="Equipe administrativa da Plata no escritório em Fortaleza" fill sizes="280px" unoptimized /></Reveal>
           <span className="about-stamp">GRUPO PLATA • CEARÁ •</span>
         </div>
         <div className="about-copy">
