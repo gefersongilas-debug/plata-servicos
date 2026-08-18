@@ -72,6 +72,8 @@ const heroSlides = [
     image: "/images/plata-frotas-real.webp",
     alt: "Equipe da Plata acompanhando a frota na central de rastreamento",
     icon: Route,
+    cardMain: { icon: MapPin, title: "Frota em movimento", text: "Trajetos e paradas em tempo real", pill: "ON" },
+    cardAlert: { icon: Gauge, label: "Cerca virtual ativa", title: "Alertas imediatos" },
   },
   {
     number: "02",
@@ -80,6 +82,8 @@ const heroSlides = [
     image: "/images/plata-monitoramento-real.webp",
     alt: "Profissional da Plata acompanhando as câmeras na central de monitoramento",
     icon: Camera,
+    cardMain: { icon: Eye, title: "Monitoramento ativo", text: "Acompanhamento 24 horas", pill: "24H" },
+    cardAlert: { icon: ShieldCheck, label: "Operação conectada", title: "Proteção + controle" },
   },
   {
     number: "03",
@@ -88,6 +92,8 @@ const heroSlides = [
     image: "/images/plata-condominial-real.webp",
     alt: "Profissional da administração condominial da Plata em atendimento",
     icon: Building2,
+    cardMain: { icon: CircleCheck, title: "Gestão em dia", text: "Prestação de contas clara", pill: "OK" },
+    cardAlert: { icon: Headphones, label: "Suporte ao síndico", title: "Atendimento próximo" },
   },
   {
     number: "04",
@@ -96,6 +102,8 @@ const heroSlides = [
     image: "/images/plata-real-seguranca.webp",
     alt: "Profissionais da segurança patrimonial da Plata em campo",
     icon: ShieldCheck,
+    cardMain: { icon: ShieldCheck, title: "Equipe em posto", text: "Presença na sua operação", pill: "ON" },
+    cardAlert: { icon: Zap, label: "Time preparado", title: "Resposta coordenada" },
   },
   {
     number: "05",
@@ -104,8 +112,11 @@ const heroSlides = [
     image: "/images/plata-facilities-real.webp",
     alt: "Equipe de facilities da Plata em um cliente",
     icon: Users,
+    cardMain: { icon: Sparkles, title: "Rotina organizada", text: "Portaria, limpeza e zeladoria", pill: "ON" },
+    cardAlert: { icon: Users, label: "Equipe dedicada", title: "Ambiente cuidado" },
   },
 ];
+
 
 const solutions = {
   frota: {
@@ -191,6 +202,8 @@ export default function Home() {
   const active = useMemo(() => solutions[activeSolution], [activeSolution]);
   const heroActive = heroSlides[heroSlide];
   const HeroActiveIcon = heroActive.icon;
+  const HeroCardMainIcon = heroActive.cardMain.icon;
+  const HeroCardAlertIcon = heroActive.cardAlert.icon;
 
   useEffect(() => {
     const revealItems = document.querySelectorAll(".reveal");
@@ -345,13 +358,17 @@ export default function Home() {
               </div>
             </div>
             <div className="floating-card card-monitoring">
-              <div className="floating-icon"><Eye size={18} /></div>
-              <div><strong>Monitoramento ativo</strong><span>Acompanhamento 24 horas</span></div>
-              <span className="status-pill">ON</span>
+              <div className="floating-card-inner" key={heroActive.number}>
+                <div className="floating-icon"><HeroCardMainIcon size={18} /></div>
+                <div><strong>{heroActive.cardMain.title}</strong><span>{heroActive.cardMain.text}</span></div>
+                <span className="status-pill">{heroActive.cardMain.pill}</span>
+              </div>
             </div>
             <div className="floating-card card-alert">
-              <span className="pulse-ring"><ShieldCheck size={21} /></span>
-              <div><span>Operação conectada</span><strong>Proteção + controle</strong></div>
+              <div className="floating-card-inner" key={heroActive.number}>
+                <span className="pulse-ring"><HeroCardAlertIcon size={21} /></span>
+                <div><span>{heroActive.cardAlert.label}</span><strong>{heroActive.cardAlert.title}</strong></div>
+              </div>
             </div>
           </div>
         </div>
