@@ -312,7 +312,7 @@ export default function Home() {
   return (
     <main>
       <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
-        <a href="#inicio" className="brand" aria-label="Plata Serviços — início" onClick={closeMenu}>
+        <a href="#inicio" className="brand" onClick={closeMenu}>
           <Image
             src={scrolled ? "/images/plata-logo.svg" : "/images/plata-logo-white.svg"}
             width={219}
@@ -321,10 +321,12 @@ export default function Home() {
             priority
             unoptimized
           />
+          <span className="sr-only">Logo Plata Serviços</span>
         </a>
 
-        <button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-label="Abrir menu" aria-expanded={menuOpen}>
+        <button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}>
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          <span className="sr-only">{menuOpen ? "Fechar menu" : "Abrir menu"}</span>
         </button>
 
         <nav className={menuOpen ? "is-open" : ""} aria-label="Navegação principal">
@@ -403,9 +405,10 @@ export default function Home() {
                       role="tab"
                       className={`hero-dot ${index === heroSlide ? "is-active" : ""}`}
                       aria-selected={index === heroSlide}
-                      aria-label={slide.title}
                       onClick={() => setHeroSlide(index)}
-                    />
+                    >
+                      <span className="sr-only">Ver slide {slide.title}</span>
+                    </button>
                   ))}
                 </div>
                 <span className="visual-index">{heroActive.number} <span>/ 0{heroSlides.length}</span></span>
@@ -429,7 +432,7 @@ export default function Home() {
 
         <div className="hero-bottom">
           <span>Fortaleza</span><i /> <span>Sobral</span><i /> <span>Atendimento em todo o Ceará</span>
-          <a href="#servicos" aria-label="Ir para serviços"><ArrowDownRight size={20} /></a>
+          <a href="#servicos"><ArrowDownRight size={20} /><span className="sr-only">Ir para serviços</span></a>
         </div>
       </section>
 
@@ -460,8 +463,8 @@ export default function Home() {
                     <h3>{service.title}</h3>
                     <p>{service.text}</p>
                   </div>
-                  <a href="#contato" onClick={() => setSelectedService(service.title)} aria-label={`Conhecer ${service.title}`}>
-                    Conhecer solução <ArrowDownRight size={19} />
+                  <a href="#contato" onClick={() => setSelectedService(service.title)}>
+                    Conhecer solução<span className="sr-only"> {service.title}</span> <ArrowDownRight size={19} />
                   </a>
                 </article>
               </Reveal>
@@ -500,7 +503,7 @@ export default function Home() {
                 );
               })}
             </div>
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="button button-outline-light">Quero conhecer <ArrowRight size={18} /></a>
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="button button-outline-light">Quero conhecer<span className="sr-only"> {activeSolution === "frota" ? "Frotas" : "Segurança"}</span> <ArrowRight size={18} /></a>
           </div>
         </div>
       </section>
@@ -685,7 +688,7 @@ export default function Home() {
         <div className="footer-top">
           <Image src="/images/plata-logo-white.svg" width={219} height={73} alt="Grupo Plata Serviços" unoptimized />
           <p>Tecnologia para proteger.<br />Confiança para seguir em frente.</p>
-          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">(88) 9862-0015 <ArrowDownRight size={18} /></a>
+          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><span className="sr-only">WhatsApp </span>(88) 9862-0015 <ArrowDownRight size={18} /></a>
         </div>
         <div className="footer-bottom">
           <span>© 2026 Grupo Plata Serviços</span>
@@ -705,7 +708,6 @@ export default function Home() {
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({ event: "botao-flutuante", event_name: "botao-flutuante", link_url: WHATSAPP_URL });
         }}
-        aria-label="Falar com a Plata pelo WhatsApp"
       >
         <Headphones size={21} /><span>Fale com a Plata</span>
       </a>
