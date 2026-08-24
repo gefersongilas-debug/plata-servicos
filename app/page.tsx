@@ -35,6 +35,14 @@ declare global {
   }
 }
 
+const readElementText = (element: Element | null) =>
+  element ? ((element as HTMLElement).innerText || element.textContent || "").replace(/\s+/g, " ").trim() : "";
+
+const pushToDataLayer = (payload: Record<string, unknown>) => {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push(payload);
+};
+
 const maskPhone = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 2) return digits.replace(/^(\d{0,2})/, "($1");
@@ -270,6 +278,28 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, [heroPaused, heroSlide]);
 
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const element = (event.target as Element | null)?.closest('a, button, [role="button"]');
+      if (!element) return;
+
+      const elementText = readElementText(element);
+      const href = element instanceof HTMLAnchorElement ? element.href : "";
+
+      pushToDataLayer({
+        event: "click_element",
+        elementText,
+        elementId: element.id || undefined,
+        elementClasses: element.getAttribute("class") || undefined,
+        elementUrl: href || undefined,
+        elementTag: element.tagName.toLowerCase(),
+      });
+    };
+
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (formStatus === "sending") return;
@@ -300,8 +330,12 @@ export default function Home() {
       .then((response) => setFormStatus(response.ok ? "sent" : "error"))
       .catch(() => setFormStatus("error"));
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: "generate_lead", form_name: "contato_lp", servico: selectedService });
+    pushToDataLayer({
+      event: "generate_lead",
+      form_name: "contato_lp",
+      servico: selectedService,
+      elementText: readElementText(event.currentTarget.querySelector('button[type="submit"]')),
+    });
 
     const message = `Olá, sou ${name || "um potencial cliente"}${company ? ` da ${company}` : ""}. Gostaria de uma proposta para ${selectedService}.`;
     window.open(`https://wa.me/558898620015?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
@@ -704,9 +738,13 @@ export default function Home() {
         rel="noreferrer"
         id="botao-flutuante"
         data-event-name="botao-flutuante"
-        onClick={() => {
-          window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push({ event: "botao-flutuante", event_name: "botao-flutuante", link_url: WHATSAPP_URL });
+        onClick={(event) => {
+          pushToDataLayer({
+            event: "botao-flutuante",
+            event_name: "botao-flutuante",
+            link_url: WHATSAPP_URL,
+            elementText: readElementText(event.currentTarget),
+          });
         }}
       >
         <Headphones size={21} /><span>Fale com a Plata</span>
