@@ -43,6 +43,72 @@ const pushToDataLayer = (payload: Record<string, unknown>) => {
   window.dataLayer.push(payload);
 };
 
+const TRACKING_PARAMS = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "utm_id",
+  "gclid",
+  "gbraid",
+  "wbraid",
+  "fbclid",
+  "msclkid",
+  "ttclid",
+] as const;
+
+type TrackingKey = (typeof TRACKING_PARAMS)[number];
+type Tracking = Partial<Record<TrackingKey | "referrer" | "landing_page", string>>;
+
+const TRACKING_STORAGE_KEY = "plata_tracking";
+
+const readStoredTracking = (): Tracking => {
+  try {
+    const raw = window.sessionStorage.getItem(TRACKING_STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Tracking) : null;
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+// Le os parametros da URL de entrada e guarda na sessao, para que o lead continue
+// atribuido mesmo depois de navegar pela pagina ou perder a query string.
+const captureTracking = (): Tracking => {
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl: Tracking = {};
+  TRACKING_PARAMS.forEach((key) => {
+    const value = params.get(key)?.trim();
+    if (value) fromUrl[key] = value.slice(0, 200);
+  });
+
+  const stored = readStoredTracking();
+  if (!Object.keys(fromUrl).length && Object.keys(stored).length) return stored;
+
+  const tracking: Tracking = {
+    ...fromUrl,
+    landing_page: window.location.href,
+    referrer: document.referrer || "",
+  };
+
+  try {
+    window.sessionStorage.setItem(TRACKING_STORAGE_KEY, JSON.stringify(tracking));
+  } catch {
+    // sessionStorage indisponivel (aba anonima/bloqueio): segue so com os dados em memoria.
+  }
+
+  return tracking;
+};
+
+const trackingToPayload = (tracking: Tracking) => {
+  const payload: Record<string, string> = {};
+  [...TRACKING_PARAMS, "referrer", "landing_page"].forEach((key) => {
+    payload[key] = tracking[key as keyof Tracking] ?? "";
+  });
+  return payload;
+};
+
 const maskPhone = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 2) return digits.replace(/^(\d{0,2})/, "($1");
@@ -231,6 +297,8 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [heroSlide, setHeroSlide] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
+  const trackingRef = useRef<Tracking>({});
+  const formRef = useRef<HTMLFormElement>(null);
   const heroRef = useRef<HTMLElement>(null);
 
   const active = useMemo(() => solutions[activeSolution], [activeSolution]);
@@ -279,6 +347,20 @@ export default function Home() {
   }, [heroPaused, heroSlide]);
 
   useEffect(() => {
+    const tracking = captureTracking();
+    trackingRef.current = tracking;
+
+    // Preenche os campos ocultos apos a montagem: o HTML do servidor nao conhece a
+    // query string, entao escrever no DOM evita divergencia de hidratacao.
+    const form = formRef.current;
+    if (!form) return;
+    Object.entries(trackingToPayload(tracking)).forEach(([key, value]) => {
+      const field = form.querySelector<HTMLInputElement>(`input[type="hidden"][name="${key}"]`);
+      if (field) field.value = value;
+    });
+  }, []);
+
+  useEffect(() => {
     const onClick = (event: MouseEvent) => {
       const element = (event.target as Element | null)?.closest('a, button, [role="button"]');
       if (!element) return;
@@ -310,6 +392,9 @@ export default function Home() {
 
     setFormStatus("sending");
 
+    // Recaptura no envio: cobre o caso de a submissao acontecer antes do efeito de montagem.
+    const leadTracking = Object.keys(trackingRef.current).length ? trackingRef.current : captureTracking();
+
     const payload = {
       nome: name,
       empresa: company,
@@ -319,6 +404,7 @@ export default function Home() {
       origem: "LP Plata Serviços",
       pagina: window.location.href,
       enviado_em: new Date().toISOString(),
+      ...trackingToPayload(leadTracking),
     };
 
     fetch(WEBHOOK_URL, {
@@ -335,6 +421,7 @@ export default function Home() {
       form_name: "contato_lp",
       servico: selectedService,
       elementText: readElementText(event.currentTarget.querySelector('button[type="submit"]')),
+      ...trackingToPayload(leadTracking),
     });
 
     const message = `Olá, sou ${name || "um potencial cliente"}${company ? ` da ${company}` : ""}. Gostaria de uma proposta para ${selectedService}.`;
@@ -664,7 +751,7 @@ export default function Home() {
         </div>
 
         <Reveal delay={120} className="form-wrap">
-          <form onSubmit={handleSubmit}>
+          <form ref={formRef} onSubmit={handleSubmit}>
             <label>Seu nome
               <input
                 name="name"
@@ -708,6 +795,11 @@ export default function Home() {
                 {services.map((service) => <option key={service.title}>{service.title}</option>)}
               </select>
             </label>
+            {/* Campos ocultos: nao renderizam no grid (input[type=hidden] e display:none)
+                e ficam disponiveis para leitores de formulario do GTM. */}
+            {[...TRACKING_PARAMS, "referrer", "landing_page"].map((key) => (
+              <input key={key} type="hidden" name={key} defaultValue="" />
+            ))}
             <button type="submit" className="button button-primary" disabled={formStatus === "sending"}>
               {formStatus === "sending" ? "Enviando..." : "Enviar e falar no WhatsApp"} <ArrowRight size={18} />
             </button>
