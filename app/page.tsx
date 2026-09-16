@@ -286,12 +286,26 @@ function Reveal({ children, className = "", delay = 0 }: { children: React.React
   );
 }
 
+function ContactCta({ className, children }: { className: string; children: React.ReactNode }) {
+  return (
+    <>
+      <a className={`${className} desktop-contact-cta`} href="#contato">
+        {children}
+      </a>
+      <a className={`${className} mobile-whatsapp-cta`} href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+        {children}
+      </a>
+    </>
+  );
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSolution, setActiveSolution] = useState<SolutionKey>("frota");
   const [scrolled, setScrolled] = useState(false);
   const [selectedService, setSelectedService] = useState("Rastreamento veicular");
   const [formName, setFormName] = useState("");
+  const [formEmail, setFormEmail] = useState("");
   const [formCompany, setFormCompany] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -387,6 +401,7 @@ export default function Home() {
     if (formStatus === "sending") return;
 
     const name = formName.trim();
+    const email = formEmail.trim();
     const company = formCompany.trim();
     const phoneDigits = formPhone.replace(/\D/g, "");
 
@@ -397,6 +412,7 @@ export default function Home() {
 
     const payload = {
       nome: name,
+      email,
       empresa: company,
       telefone: formPhone,
       telefone_e164: `+55${phoneDigits}`,
@@ -424,8 +440,6 @@ export default function Home() {
       ...trackingToPayload(leadTracking),
     });
 
-    const message = `Olá, sou ${name || "um potencial cliente"}${company ? ` da ${company}` : ""}. Gostaria de uma proposta para ${selectedService}.`;
-    window.open(`https://wa.me/558898620015?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
   };
 
   const closeMenu = () => setMenuOpen(false);
@@ -457,9 +471,9 @@ export default function Home() {
           <a href="#contato" onClick={closeMenu}>Contato</a>
         </nav>
 
-        <a className="header-cta" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+        <ContactCta className="header-cta">
           Solicitar proposta <ArrowDownRight size={17} />
-        </a>
+        </ContactCta>
       </header>
 
       <section className="hero" id="inicio" ref={heroRef}>
@@ -480,9 +494,9 @@ export default function Home() {
               Tecnologia, pessoas e gestão em um único grupo para cuidar do seu patrimônio, da sua frota e da rotina do seu negócio.
             </p>
             <div className="hero-actions hero-enter delay-4">
-              <a className="button button-primary" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+              <ContactCta className="button button-primary">
                 Falar com um especialista <ArrowRight size={18} />
-              </a>
+              </ContactCta>
               <a className="text-link" href="#servicos">Explorar soluções <ChevronDown size={17} /></a>
             </div>
           </div>
@@ -624,7 +638,7 @@ export default function Home() {
                 );
               })}
             </div>
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="button button-outline-light">Quero conhecer<span className="sr-only"> {activeSolution === "frota" ? "Frotas" : "Segurança"}</span> <ArrowRight size={18} /></a>
+            <ContactCta className="button button-outline-light">Quero conhecer<span className="sr-only"> {activeSolution === "frota" ? "Frotas" : "Segurança"}</span> <ArrowRight size={18} /></ContactCta>
           </div>
         </div>
       </section>
@@ -743,7 +757,7 @@ export default function Home() {
         <div className="contact-copy">
           <Reveal><p className="eyebrow light"><span>07</span> Vamos conversar?</p></Reveal>
           <Reveal delay={80}><h2>Conte o seu desafio.<br /><em>A Plata cuida</em> do próximo passo.</h2></Reveal>
-          <Reveal delay={140}><p>Preencha os dados e continue a conversa com um especialista pelo WhatsApp.</p></Reveal>
+          <Reveal delay={140}><p>Preencha os seus dados para que um especialista entre em contato.</p></Reveal>
           <Reveal delay={200} className="contact-details">
             <div><MapPin size={20} /><span><strong>Fortaleza</strong>Rua Carlos Vasconcelos, 819 — Meireles</span></div>
             <div><MapPin size={20} /><span><strong>Sobral</strong>Rua Maestro José Pedro, 407 — Centro</span></div>
@@ -765,6 +779,17 @@ export default function Home() {
                 required
               />
             </label>
+            <label>E-mail
+              <input
+                name="email"
+                type="email"
+                placeholder="voce@empresa.com.br"
+                value={formEmail}
+                onChange={(e) => setFormEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+            </label>
             <label>Empresa
               <input
                 name="company"
@@ -775,7 +800,7 @@ export default function Home() {
                 autoComplete="organization"
               />
             </label>
-            <label>Telefone
+            <label>WhatsApp
               <input
                 name="phone"
                 type="tel"
@@ -801,10 +826,10 @@ export default function Home() {
               <input key={key} type="hidden" name={key} defaultValue="" />
             ))}
             <button type="submit" className="button button-primary" disabled={formStatus === "sending"}>
-              {formStatus === "sending" ? "Enviando..." : "Enviar e falar no WhatsApp"} <ArrowRight size={18} />
+              {formStatus === "sending" ? "Enviando..." : "Enviar proposta"} <ArrowRight size={18} />
             </button>
             {formStatus === "sent" && <small className="form-status form-status-ok" role="status"><Check size={14} /> Recebemos seus dados. Em instantes um especialista fala com você.</small>}
-            {formStatus === "error" && <small className="form-status form-status-error" role="alert"><ShieldCheck size={14} /> Não conseguimos registrar seus dados, mas você já pode falar com a gente no WhatsApp.</small>}
+            {formStatus === "error" && <small className="form-status form-status-error" role="alert"><ShieldCheck size={14} /> Não conseguimos registrar seus dados. <a href={WHATSAPP_URL} target="_blank" rel="noreferrer">Falar pelo WhatsApp</a></small>}
             <small><ShieldCheck size={14} /> Seus dados serão usados apenas para este atendimento.</small>
           </form>
         </Reveal>
