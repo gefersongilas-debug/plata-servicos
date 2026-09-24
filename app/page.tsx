@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 const WHATSAPP_URL =
-  "https://wa.me/558898620015?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20proposta%20da%20Plata%20Servi%C3%A7os.";
+  "https://wa.me/5585958548973?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20proposta%20da%20Plata%20Servi%C3%A7os.";
 
 const WEBHOOK_URL = "https://hook.us1.make.celonis.com/vxs7dufd4l2vydoibl2uqnno1h4zgat5";
 
@@ -839,7 +839,7 @@ export default function Home() {
         <div className="footer-top">
           <Image src="/images/plata-logo-white.svg" width={219} height={73} alt="Grupo Plata Serviços" unoptimized />
           <p>Tecnologia para proteger.<br />Confiança para seguir em frente.</p>
-          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><span className="sr-only">WhatsApp </span>(88) 9862-0015 <ArrowDownRight size={18} /></a>
+          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer"><span className="sr-only">WhatsApp </span>(85) 95854-8973 <ArrowDownRight size={18} /></a>
         </div>
         <div className="footer-bottom">
           <span>© 2026 Grupo Plata Serviços</span>
