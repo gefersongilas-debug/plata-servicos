@@ -15,107 +15,26 @@ import {
   Gauge,
   Headphones,
   MapPin,
-  Menu,
   Route,
   ShieldCheck,
   Sparkles,
   Users,
-  X,
   Zap,
 } from "lucide-react";
+import { SiteHeader } from "@/components/SiteHeader";
+import {
+  TRACKING_PARAMS,
+  type Tracking,
+  WEBHOOK_URL,
+  captureTracking,
+  maskPhone,
+  pushToDataLayer,
+  readElementText,
+  trackingToPayload,
+} from "@/lib/lead-tracking";
 
 const WHATSAPP_URL =
   "https://wa.me/5585958548973?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20uma%20proposta%20da%20Plata%20Servi%C3%A7os.";
-
-const WEBHOOK_URL = "https://hook.us1.make.celonis.com/vxs7dufd4l2vydoibl2uqnno1h4zgat5";
-
-declare global {
-  interface Window {
-    dataLayer?: Record<string, unknown>[];
-  }
-}
-
-const readElementText = (element: Element | null) =>
-  element ? ((element as HTMLElement).innerText || element.textContent || "").replace(/\s+/g, " ").trim() : "";
-
-const pushToDataLayer = (payload: Record<string, unknown>) => {
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(payload);
-};
-
-const TRACKING_PARAMS = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-  "utm_id",
-  "gclid",
-  "gbraid",
-  "wbraid",
-  "fbclid",
-  "msclkid",
-  "ttclid",
-] as const;
-
-type TrackingKey = (typeof TRACKING_PARAMS)[number];
-type Tracking = Partial<Record<TrackingKey | "referrer" | "landing_page", string>>;
-
-const TRACKING_STORAGE_KEY = "plata_tracking";
-
-const readStoredTracking = (): Tracking => {
-  try {
-    const raw = window.sessionStorage.getItem(TRACKING_STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as Tracking) : null;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-};
-
-// Le os parametros da URL de entrada e guarda na sessao, para que o lead continue
-// atribuido mesmo depois de navegar pela pagina ou perder a query string.
-const captureTracking = (): Tracking => {
-  const params = new URLSearchParams(window.location.search);
-  const fromUrl: Tracking = {};
-  TRACKING_PARAMS.forEach((key) => {
-    const value = params.get(key)?.trim();
-    if (value) fromUrl[key] = value.slice(0, 200);
-  });
-
-  const stored = readStoredTracking();
-  if (!Object.keys(fromUrl).length && Object.keys(stored).length) return stored;
-
-  const tracking: Tracking = {
-    ...fromUrl,
-    landing_page: window.location.href,
-    referrer: document.referrer || "",
-  };
-
-  try {
-    window.sessionStorage.setItem(TRACKING_STORAGE_KEY, JSON.stringify(tracking));
-  } catch {
-    // sessionStorage indisponivel (aba anonima/bloqueio): segue so com os dados em memoria.
-  }
-
-  return tracking;
-};
-
-const trackingToPayload = (tracking: Tracking) => {
-  const payload: Record<string, string> = {};
-  [...TRACKING_PARAMS, "referrer", "landing_page"].forEach((key) => {
-    payload[key] = tracking[key as keyof Tracking] ?? "";
-  });
-  return payload;
-};
-
-const maskPhone = (value: string) => {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  if (digits.length <= 2) return digits.replace(/^(\d{0,2})/, "($1");
-  if (digits.length <= 6) return digits.replace(/^(\d{2})(\d{0,4})/, "($1) $2");
-  if (digits.length <= 10) return digits.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
-  return digits.replace(/^(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
-};
 
 const maskName = (value: string) =>
   value.replace(/[^A-Za-zÀ-ÿ'\s-]/g, "").replace(/\s{2,}/g, " ").slice(0, 60);
@@ -130,6 +49,7 @@ const services = [
   {
     number: "01",
     title: "Rastreamento veicular",
+    href: "/rastreamento-veicular",
     text: "Visibilidade de trajetos, paradas e manutenção para uma frota mais segura e eficiente.",
     icon: Route,
     accent: true,
@@ -137,24 +57,28 @@ const services = [
   {
     number: "02",
     title: "Segurança eletrônica",
+    href: "/seguranca-eletronica",
     text: "Tecnologia, controle de acesso e monitoramento 24 horas para proteger o seu patrimônio.",
     icon: Camera,
   },
   {
     number: "03",
     title: "Administração condominial",
+    href: "/administracao-de-condominios",
     text: "Gestão completa, transparente e próxima para simplificar a rotina do condomínio.",
     icon: Building2,
   },
   {
     number: "04",
     title: "Segurança patrimonial",
+    href: "/seguranca-patrimonial",
     text: "Profissionais treinados e preparados para operações que exigem confiança e presença.",
     icon: ShieldCheck,
   },
   {
     number: "05",
     title: "Facilities",
+    href: "/facilities",
     text: "Equipes qualificadas em portaria, limpeza e zeladoria para manter sua operação no ritmo.",
     icon: Users,
   },
@@ -300,9 +224,7 @@ function ContactCta({ className, children }: { className: string; children: Reac
 }
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [activeSolution, setActiveSolution] = useState<SolutionKey>("frota");
-  const [scrolled, setScrolled] = useState(false);
   const [selectedService, setSelectedService] = useState("Rastreamento veicular");
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -337,7 +259,6 @@ export default function Home() {
     revealItems.forEach((item) => observer.observe(item));
 
     const onScroll = () => {
-      setScrolled(window.scrollY > 32);
       if (heroRef.current) {
         const shift = Math.min(window.scrollY * 0.12, 80);
         heroRef.current.style.setProperty("--hero-shift", `${shift}px`);
@@ -372,28 +293,6 @@ export default function Home() {
       const field = form.querySelector<HTMLInputElement>(`input[type="hidden"][name="${key}"]`);
       if (field) field.value = value;
     });
-  }, []);
-
-  useEffect(() => {
-    const onClick = (event: MouseEvent) => {
-      const element = (event.target as Element | null)?.closest('a, button, [role="button"]');
-      if (!element) return;
-
-      const elementText = readElementText(element);
-      const href = element instanceof HTMLAnchorElement ? element.href : "";
-
-      pushToDataLayer({
-        event: "click_element",
-        elementText,
-        elementId: element.id || undefined,
-        elementClasses: element.getAttribute("class") || undefined,
-        elementUrl: href || undefined,
-        elementTag: element.tagName.toLowerCase(),
-      });
-    };
-
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
   }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -442,39 +341,21 @@ export default function Home() {
 
   };
 
-  const closeMenu = () => setMenuOpen(false);
-
   return (
     <main>
-      <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
-        <a href="#inicio" className="brand" onClick={closeMenu}>
-          <Image
-            src={scrolled ? "/images/plata-logo.svg" : "/images/plata-logo-white.svg"}
-            width={219}
-            height={73}
-            alt="Grupo Plata Serviços"
-            priority
-            unoptimized
-          />
-          <span className="sr-only">Logo Plata Serviços</span>
-        </a>
-
-        <button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen}>
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          <span className="sr-only">{menuOpen ? "Fechar menu" : "Abrir menu"}</span>
-        </button>
-
-        <nav className={menuOpen ? "is-open" : ""} aria-label="Navegação principal">
-          <a href="#servicos" onClick={closeMenu}>Serviços</a>
-          <a href="#solucoes" onClick={closeMenu}>Soluções</a>
-          <a href="#plata" onClick={closeMenu}>A Plata</a>
-          <a href="#contato" onClick={closeMenu}>Contato</a>
-        </nav>
-
-        <ContactCta className="header-cta">
-          Solicitar proposta <ArrowDownRight size={17} />
-        </ContactCta>
-      </header>
+      <SiteHeader
+        homeHref="#inicio"
+        links={[
+          { href: "#solucoes", label: "Soluções" },
+          { href: "#plata", label: "A Plata" },
+          { href: "#contato", label: "Contato" },
+        ]}
+        cta={
+          <ContactCta className="header-cta">
+            Solicitar proposta <ArrowDownRight size={17} />
+          </ContactCta>
+        }
+      />
 
       <section className="hero" id="inicio" ref={heroRef}>
         <div className="hero-grain" />
@@ -598,7 +479,7 @@ export default function Home() {
                     <h3>{service.title}</h3>
                     <p>{service.text}</p>
                   </div>
-                  <a href="#contato" onClick={() => setSelectedService(service.title)}>
+                  <a href={service.href}>
                     Conhecer solução<span className="sr-only"> {service.title}</span> <ArrowDownRight size={19} />
                   </a>
                 </article>

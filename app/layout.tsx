@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope, Plus_Jakarta_Sans } from "next/font/google";
+import { ClickTracking } from "@/components/ClickTracking";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -56,6 +57,7 @@ gtag('config', '${GA_MEASUREMENT_ID}');`,
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+        <ClickTracking />
         {children}
       </body>
     </html>

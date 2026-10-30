@@ -61,6 +61,8 @@ a svg, a img, button svg, button img, a .sr-only, button .sr-only { pointer-even
   border-bottom-color: rgba(20, 20, 20, .08);
 }
 
+.site-header--lp { background: #121212; padding-inline: max(48px, calc((100% - 1220px) / 2)); }
+
 .brand { width: 168px; height: 56px; overflow: hidden; display: flex; align-items: center; }
 .brand img { width: 168px; height: auto; }
 
@@ -68,6 +70,18 @@ a svg, a img, button svg, button img, a .sr-only, button .sr-only { pointer-even
 .site-header nav a { font-size: 13px; font-weight: 700; letter-spacing: .02em; position: relative; }
 .site-header nav a::after { content: ""; position: absolute; left: 0; bottom: -7px; width: 0; height: 2px; background: var(--orange); transition: width .25s ease; }
 .site-header nav a:hover::after { width: 100%; }
+
+.services-menu { position: relative; }
+.services-menu-toggle { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.services-menu-toggle svg { transition: transform .2s ease; }
+.services-menu.is-open .services-menu-toggle svg { transform: rotate(180deg); }
+.services-menu-list { position: absolute; top: calc(100% + 16px); left: -14px; min-width: 262px; margin: 0; padding: 8px; list-style: none; background: #171717; color: white; border-radius: 6px; box-shadow: 0 22px 50px rgba(0,0,0,.3); opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .2s ease, transform .2s ease, visibility .2s ease; }
+.services-menu-list::before { content: ""; position: absolute; left: 0; right: 0; top: -16px; height: 16px; }
+.services-menu.is-open .services-menu-list { opacity: 1; visibility: visible; transform: translateY(0); }
+.site-header nav .services-menu-list a { display: block; padding: 11px 12px; border-radius: 4px; transition: background .2s ease, color .2s ease; }
+.site-header nav .services-menu-list a::after { display: none; }
+.site-header nav .services-menu-list a:hover { background: rgba(255,255,255,.08); color: var(--orange-bright); }
+.site-header nav .services-menu-list a[aria-current="page"] { color: var(--orange-bright); }
 
 .header-cta {
   height: 46px;
@@ -383,6 +397,11 @@ footer { background: #111; color: white; padding: 70px clamp(24px, 7vw, 110px) 2
   .site-header nav.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
   .site-header nav a { padding: 15px 4px; border-bottom: 1px solid rgba(255,255,255,.12); }
   .site-header nav a::after { display: none; }
+  .services-menu-toggle { display: block; width: 100%; padding: 15px 4px 6px; color: rgba(255,255,255,.55); font-size: 11px; letter-spacing: .1em; text-align: left; text-transform: uppercase; pointer-events: none; }
+  .services-menu-toggle svg { display: none; }
+  .services-menu-list { position: static; min-width: 0; padding: 0 0 8px; background: none; border-bottom: 1px solid rgba(255,255,255,.12); border-radius: 0; box-shadow: none; opacity: 1; visibility: inherit; transform: none; transition: none; }
+  .services-menu-list::before { display: none; }
+  .site-header nav .services-menu-list a { padding: 11px 4px; border-bottom: 0; }
   .header-cta { display: none; }
   .desktop-contact-cta { display: none; }
   .mobile-whatsapp-cta, .button.mobile-whatsapp-cta { display: inline-flex; }
